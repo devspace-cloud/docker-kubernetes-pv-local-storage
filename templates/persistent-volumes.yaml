@@ -1,0 +1,55 @@
+{{- range $pvIndex, $pv := .Values.persistentVolumes }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $pv.name | quote }}
+spec:
+  capacity:
+    storage: {{ $pv.size }}
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: {{ $pv.reclaimPolicy }}
+  storageClassName: {{ $.Values.localStorageClass.name | quote }}
+  local:
+    path: /var/lib/docker/k8s-local-storage/{{ $pv.name }}
+  nodeAffinity: {{- toYaml $.Values.localStorageClass.nodeAffinity | nindent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "local-storage-init-{{ $pv.name }}"
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+spec:
+  template:
+    spec:
+      containers:
+        - name: job
+          image: busybox:1.28
+          command: ['sh', '-c', 'mkdir -p /var/lib/docker/k8s-local-storage/{{ $pv.name }}']
+          volumeMounts:
+            - mountPath: /var/lib/docker
+              name: docker-dir
+      restartPolicy: Never
+      volumes:
+        - name: docker-dir
+          hostPath:
+            path: /var/lib/docker
+  backoffLimit: 4
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "local-storage-purge-{{ $pv.name }}"
+  annotations:
+    "helm.sh/hook": "post-delete"
+spec:
+  template:
+    spec:
+      containers:
+        - name: job
+          image: bitnami/kubectl:1.15-debian-9
+          command: ['sh', '-c', 'kubectl delete --ignore-not-found pvc data-{{ $pv.name }}; kubectl delete --ignore-not-found job local-storage-init-{{ $pv.name }} local-storage-purge-{{ $pv.name }}']
+      restartPolicy: Never
+  backoffLimit: 4
+{{- end }}

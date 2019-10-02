@@ -1,0 +1,4 @@
+apiVersion: v1
+name: docker-kubernetes-pv-local-storage
+description: This chart lets you create a local storage class and persistent volumes for a local Kubernetes cluster started with Docker Desktop.
+version: 0.0.1

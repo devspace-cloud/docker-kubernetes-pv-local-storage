@@ -1,0 +1,18 @@
+# StorageClass for local Kubernetes clusters
+localStorageClass:
+  name: devspace-local-storage
+  reclaimPolicy: Delete
+  isDefault: true
+  nodeAffinity: # default nodeAffinity for all persistent volumes
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - "docker-desktop"
+
+persistentVolumes:
+- name: my-local-pv-1
+  size: 50Gi
+  reclaimPolicy: Retain
