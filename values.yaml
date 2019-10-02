@@ -16,3 +16,6 @@ persistentVolumes:
 - name: my-local-pv-1
   size: 50Gi
   reclaimPolicy: Retain
+- name: my-local-pv-2
+  size: 5Gi
+  reclaimPolicy: Retain

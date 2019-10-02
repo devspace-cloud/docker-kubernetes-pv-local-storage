@@ -3,6 +3,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $pv.name | quote }}
+  labels:
+    "devspace.cloud/pvName": "{{ $pv.name }}"
 spec:
   capacity:
     storage: {{ $pv.size }}
@@ -17,7 +19,9 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "local-storage-init-{{ $pv.name }}"
+  name: "local-storage-init-{{ $pv.name }}-{{ $.Release.Revision }}"
+  labels:
+    "devspace.cloud/pvName": "{{ $pv.name }}"
   annotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
 spec:
@@ -40,7 +44,9 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "local-storage-purge-{{ $pv.name }}"
+  name: "local-storage-purge-{{ $pv.name }}-{{ $.Release.Revision }}"
+  labels:
+    "devspace.cloud/pvName": "{{ $pv.name }}"
   annotations:
     "helm.sh/hook": "post-delete"
 spec:
@@ -49,7 +55,8 @@ spec:
       containers:
         - name: job
           image: bitnami/kubectl:1.15-debian-9
-          command: ['sh', '-c', 'kubectl delete --ignore-not-found pvc data-{{ $pv.name }}; kubectl delete --ignore-not-found job local-storage-init-{{ $pv.name }} local-storage-purge-{{ $pv.name }}']
+          command: ['sh', '-c', 'kubectl delete --ignore-not-found job,pvc -l "devspace.cloud/pvName:{{ $pv.name }}"']
       restartPolicy: Never
   backoffLimit: 4
+---
 {{- end }}

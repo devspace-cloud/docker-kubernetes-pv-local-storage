@@ -14,7 +14,7 @@ kubectl get pv
 
 ## Add/Remove Volumes
 1. Update `values.yaml` and add/remove `persistentVolumes`
-2. Run `helm upgrade --name=local-storage ./docker-kubernetes-pv-local-storage`
+2. Run `helm upgrade local-storage ./docker-kubernetes-pv-local-storage`
 
 ## Purge Persistent Volumes from Disk
 When you delete the Kubernetes persistent volume object, the underlying data will still be stored on your disk. To purge the data from your computer permanently, run:
