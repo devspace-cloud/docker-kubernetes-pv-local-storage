@@ -20,7 +20,7 @@ kubectl get pv
 When you delete the Kubernetes persistent volume object, the underlying data will still be stored on your disk. To purge the data from your computer permanently, run:
 ```bash
 PV_NAME="my-local-pv-1"
-docker run --net=host --ipc=host --uts=host --pid=host -it --security-opt=seccomp=unconfined --privileged --rm -v /:/docker-vm alpine /bin/sh -c "rm -r /docker-vm/var/lib/docker/k8s-local-storage/$PV_NAME"
+docker run --net=host --ipc=host --uts=host --pid=host -it --security-opt=seccomp=unconfined --privileged --rm -v //:/docker-vm alpine //bin/sh -c "rm -r /docker-vm/var/lib/docker/k8s-local-storage/$PV_NAME"
 ```
 
 ## Uninstall
